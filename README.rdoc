@@ -1,20 +1,20 @@
-Hugo Demiglio Arduino RoomOS
+== Hugo Demiglio Arduino RoomOS
 
 Current version 1.0.2
 
-Change log
+> Change log
 
-# 1.0.2 (2011-05-12)
+== 1.0.2 (2011-05-12)
 - Trying another method to retrieve the time
-- Problem with button locked resolvido
+- Problem with button locked solved
 
-# 1.0.1 (2011-05-08)
+== 1.0.1 (2011-05-08)
 - Debug to verify problem with date and time
 - Turn off the LED screen after 30 seconds with the lights out
 - Adding support to the remote control of tv decoder
 - Turn off the lights at two o'clock in the morning automatically
 
-# 1.0.0 (2011-05-07)
+== 1.0.0 (2011-05-07)
 - Date and time on screen
 - System temperature on the screen
 - Displaying status of lights literally
