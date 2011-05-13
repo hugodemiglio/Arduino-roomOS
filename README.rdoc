@@ -7,6 +7,7 @@ Current version 1.0.2
 == 1.0.2 (2011-05-12)
 - Trying another method to retrieve the time
 - Problem with button locked solved
+- Improvements in the symbol of temperature.
 
 == 1.0.1 (2011-05-08)
 - Debug to verify problem with date and time

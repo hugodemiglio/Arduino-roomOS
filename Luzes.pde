@@ -11,7 +11,7 @@ int statusNegra = 0, statusBranca = 0, lcdLedStatus = 0, lcdLedTime = 1, respost
 
 //Caracteres
 byte termometro[8] = {B00100, B01010, B01010, B01110, B01110, B11111, B11111, B01110};
-byte bolinha[8] = {B01100, B10010, B01100, B00000, B00000, B00000, B00000, B00000};
+byte bolinha[8] = {B01100, B10010, B10010, B01100, B00000, B00000, B00000, B00000};
 
 //Sistema de temperatura
 int tempc = 0, samples[8], tempertura = A0;
