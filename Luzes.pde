@@ -19,8 +19,15 @@ int tempc = 0, samples[8], tempertura = A0;
 //Teclado
 int tecla = 0, tecladoPin = A1, ultimoBotao = 0, turnOn = 0;
 
+//Uptime das luzes
+int uhora = 0, uminuto = 0, usegundo = 0;
+
+//Controle de consumo
+float wbranca = 0.66, wnegra = 0.33, tconsumo = 0;
+int consumo = 0;
+
 // Relógio e calendário
-int dia = 12, mes = 5, ano = 11, hora = 21, minuto = 4, segundos = 0, relogioSegundo = 0;
+int dia = 5, mes = 6, ano = 11, hora = 3, minuto = 42, segundos = 0, relogioSegundo = 0;
 
 //Sistema de infravermelho
 int valorIR = 0;
@@ -42,7 +49,7 @@ void setup() {
   lcd.createChar(1, bolinha);
   analogWrite(9, 100);
   lcd.setCursor(0, 0);
-  lcd.print("HG RoomOS 1.0.2");
+  lcd.print("HG RoomOS 1.0.3");
   lcd.setCursor(0, 1);
   lcd.print("   Bem-vindo!   ");
   delay(3000);
@@ -90,6 +97,7 @@ void loop() {
   statusLuzes();
   lcdLedTimer();
   relogioLoop();
+  controleLoop();
   showRelogio();
   //debug();
   
@@ -104,6 +112,7 @@ void loop() {
 
 int acender(int luz){
   digitalWrite(luz, LOW);
+  zerarControle();
   if(luz == luzBranca){
     analogWrite(9, 100);
     //digitalWrite(leds, LOW);
@@ -113,6 +122,7 @@ int acender(int luz){
 
 int apagar(int luz){
   digitalWrite(luz, HIGH);
+  zerarControle();
   if(luz == luzBranca){
     analogWrite(9, 5);
     //digitalWrite(leds, HIGH);
@@ -153,6 +163,7 @@ void relogioLoop(){
   if(segundo > relogioSegundo || segundo < relogioSegundo){
     relogioSegundo = segundo;
     segundos = segundos + 1;
+    usegundo = usegundo + 1;
   }
   if(segundos >= 60){
     minuto = minuto + 1;
@@ -182,6 +193,29 @@ void relogioLoop(){
   }
 }
 
+void controleLoop(){
+  if(statusBranca == 1 || statusNegra == 1){
+    consumo = (tconsumo * (uminuto + (uhora * 60)));
+    if(usegundo >= 60){
+      uminuto = uminuto + 1;
+      usegundo = 0;
+    }
+    if(uminuto >= 60){
+      uhora = uhora + 1;
+      uminuto = 0;
+    }
+    if(uhora >= 99){
+      uhora = 0;
+    }
+    if(uhora < 0){
+      uhora = 0;
+    }
+    if(uminuto < 0){
+      uminuto = 0;
+    }
+  }
+}
+
 void showRelogio(){
   lcd.setCursor(5, 1);
   showInt(dia);
@@ -191,6 +225,14 @@ void showRelogio(){
   showInt(hora);
   lcd.print(":");
   showInt(minuto);
+}
+
+void showLightUptime(){
+  if(uhora == 0) showInt(uminuto);
+  else showInt(uhora);
+  lcd.print(":");
+  if(uhora == 0) showInt(usegundo);
+  else showInt(uminuto);
 }
 
 void showInt(int valor){
@@ -235,14 +277,25 @@ void statusLuzes(){
   lcd.setCursor(0, 0);
   if(statusBranca == 0 && statusNegra == 0){
     lcd.print(" Luzes apagadas ");
+    tconsumo = 0;
   } else {
-    if(statusBranca == 1 && statusNegra == 1){
-      lcd.print("  Luzes acesas  ");
+    if(segundos >= 30){
+      showLightUptime();
+      lcd.print("   ");
+      showInt(consumo);
+      lcd.print(" Watts   ");
     } else {
-      if(statusBranca == 1){
-        lcd.print("Luz branca acesa");
+      if(statusBranca == 1 && statusNegra == 1){
+        lcd.print("  Luzes acesas  ");
+        tconsumo = wbranca + wnegra;
       } else {
-        lcd.print("Luz negra acesa");
+        if(statusBranca == 1){
+          lcd.print("Luz branca acesa");
+          tconsumo = wbranca;
+        } else {
+          lcd.print("Luz negra acesa");
+          tconsumo = wnegra;
+        }
       }
     }
   }
@@ -254,6 +307,13 @@ void statusLuzes(){
     analogWrite(9, 100);
     digitalWrite(leds, LOW);
   }
+}
+
+void zerarControle(){
+  consumo = 0;
+  uhora = 0;
+  uminuto = 0;
+  usegundo = 0;
 }
 
 int teclado(int tecladoPin){

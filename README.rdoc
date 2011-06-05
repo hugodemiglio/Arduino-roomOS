@@ -1,8 +1,11 @@
 == Hugo Demiglio Arduino RoomOS
 
-Current version 1.0.2
+Current version 1.0.3
 
 > Change log
+
+== 1.0.3 (2011-06-05)
+- System that monitors the time and current consumption of the lights
 
 == 1.0.2 (2011-05-12)
 - Trying another method to retrieve the time
