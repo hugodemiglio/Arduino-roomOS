@@ -1,8 +1,11 @@
 == Hugo Demiglio Arduino RoomOS
 
-Current version 1.0.3
+Current version 1.0.4
 
 > Change log
+
+== 1.0.4 (2011-07-22)
+- New notification system on the screen
 
 == 1.0.3 (2011-06-05)
 - System that monitors the time and current consumption of the lights

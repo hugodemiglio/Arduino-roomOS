@@ -7,7 +7,7 @@ LiquidCrystal lcd(7, 6, 5, 4, 3, 2);
 int luzNegra = 8, luzBranca = 12;
 
 //Variaveis de ambiente
-int statusNegra = 0, statusBranca = 0, lcdLedStatus = 0, lcdLedTime = 1, resposta, i, ultimoTemp = 0, segundo = 0, leds = 11;
+int statusNegra = 0, statusBranca = 0, lcdLedStatus = 0, lcdLedTime = 1, resposta, i, ultimoTemp = 0, segundo = 0, leds = 11, pushVar = 0;
 
 //Caracteres
 byte termometro[8] = {B00100, B01010, B01010, B01110, B01110, B11111, B11111, B01110};
@@ -27,7 +27,7 @@ float wbranca = 0.66, wnegra = 0.33, tconsumo = 0;
 int consumo = 0;
 
 // Relógio e calendário
-int dia = 5, mes = 6, ano = 11, hora = 3, minuto = 42, segundos = 0, relogioSegundo = 0;
+int dia = 4, mes = 7, ano = 11, hora = 4, minuto = 17, segundos = 0, relogioSegundo = 0;
 
 //Sistema de infravermelho
 int valorIR = 0;
@@ -49,7 +49,7 @@ void setup() {
   lcd.createChar(1, bolinha);
   analogWrite(9, 100);
   lcd.setCursor(0, 0);
-  lcd.print("HG RoomOS 1.0.3");
+  lcd.print("HG RoomOS 1.0.4");
   lcd.setCursor(0, 1);
   lcd.print("   Bem-vindo!   ");
   delay(3000);
@@ -95,6 +95,7 @@ void loop() {
   
   exibirTemperatura(segundo, ultimoTemp);
   statusLuzes();
+  push();
   lcdLedTimer();
   relogioLoop();
   controleLoop();
@@ -105,6 +106,7 @@ void loop() {
   
   delay(200);
   if(segundo == (ultimoTemp + 5)){
+    pushNext();
     ultimoTemp = segundo;
     turnOn = 1;
   }
@@ -113,6 +115,7 @@ void loop() {
 int acender(int luz){
   digitalWrite(luz, LOW);
   zerarControle();
+  pushVar = 4;
   if(luz == luzBranca){
     analogWrite(9, 100);
     //digitalWrite(leds, LOW);
@@ -274,7 +277,7 @@ void exibirTemperatura(int seg, int ultimo){
 }
 
 void statusLuzes(){
-  lcd.setCursor(0, 0);
+  /*lcd.setCursor(0, 0);
   if(statusBranca == 0 && statusNegra == 0){
     lcd.print(" Luzes apagadas ");
     tconsumo = 0;
@@ -298,7 +301,7 @@ void statusLuzes(){
         }
       }
     }
-  }
+  }*/
   
   if(statusBranca == 0){
     analogWrite(9, 5);
@@ -314,6 +317,14 @@ void zerarControle(){
   uhora = 0;
   uminuto = 0;
   usegundo = 0;
+}
+
+void limparTela(){
+  for (int i = 0; i <= 15; i++) {
+    lcd.print(" "); 
+    delay(90);
+  }
+  lcd.setCursor(0, 0);
 }
 
 int teclado(int tecladoPin){
@@ -337,4 +348,72 @@ int teclado(int tecladoPin){
   }
 }
 
+void push(){
+  lcd.setCursor(0, 0);
+  
+  switch(pushVar){
+    /* Mostra o status das luzes */
+    case 0:
+      if(statusBranca == 0 && statusNegra == 0){
+        lcd.print(" Luzes apagadas ");
+        tconsumo = 0;
+      } else {
+        if(statusBranca == 1 && statusNegra == 1){
+          lcd.print("  Luzes acesas  ");
+          tconsumo = wbranca + wnegra;
+        } else {
+          if(statusBranca == 1){
+            lcd.print("Luz branca acesa");
+            tconsumo = wbranca;
+          } else {
+            lcd.print("Luz negra acesa");
+            tconsumo = wnegra;
+          }
+        }
+      }
+      break;
+      
+    /* Mostra o consumo de energia da luz */
+    case 1:
+      showLightUptime();
+      lcd.print("   ");
+      showInt(consumo);
+      lcd.print(" Watts   ");
+      break;
+      
+    /* Mostra os lembretes de contas */
+    case 2:
+      if(dia == 9){
+        lcd.print("Pagar cart. VISA");
+      } else if(dia == 21) {
+        lcd.print("Pagar MasterCard");
+      } else {
+        pushNext();
+      }
+      break;
+      
+    /* Mostra o status da temperatuda */
+    case 3:
+      if(tempc <= 18){
+        lcd.print(" Ambiente frio  ");
+      } else if(tempc >= 26){
+        lcd.print("Ambiente quente ");
+      } else {
+        lcd.print("Temp. agradavel ");
+      }
+      break;
+    
+    /* Mostra a versao do sistema */
+    case 4:
+      lcd.print("HG RoomOS 1.0.4");
+      break;
+  }
+}
 
+void pushNext(){
+  if(pushVar != 4){
+    pushVar = 0;
+  } else {
+    pushVar = pushVar + 1;
+  }
+}
