@@ -27,7 +27,7 @@ float wbranca = 0.66, wnegra = 0.33, tconsumo = 0;
 int consumo = 0;
 
 // Relógio e calendário
-int dia = 4, mes = 7, ano = 11, hora = 4, minuto = 17, segundos = 0, relogioSegundo = 0;
+int dia = 23, mes = 7, ano = 11, hora = 6, minuto = 10, segundos = 0, relogioSegundo = 0;
 
 //Sistema de infravermelho
 int valorIR = 0;
@@ -115,7 +115,7 @@ void loop() {
 int acender(int luz){
   digitalWrite(luz, LOW);
   zerarControle();
-  pushVar = 4;
+  pushVar = 3;
   if(luz == luzBranca){
     analogWrite(9, 100);
     //digitalWrite(leds, LOW);
@@ -303,13 +303,13 @@ void statusLuzes(){
     }
   }*/
   
-  if(statusBranca == 0){
+  /*if(statusBranca == 0){
     analogWrite(9, 5);
     digitalWrite(leds, HIGH);
   } else {
     analogWrite(9, 100);
     digitalWrite(leds, LOW);
-  }
+  }*/
 }
 
 void zerarControle(){
@@ -375,10 +375,14 @@ void push(){
       
     /* Mostra o consumo de energia da luz */
     case 1:
-      showLightUptime();
-      lcd.print("   ");
-      showInt(consumo);
-      lcd.print(" Watts   ");
+      if(statusBranca == 0 && statusNegra == 0){
+        pushNext();
+      } else {
+        showLightUptime();
+        lcd.print("   ");
+        showInt(consumo);
+        lcd.print(" Watts   ");
+      }
       break;
       
     /* Mostra os lembretes de contas */
@@ -411,7 +415,7 @@ void push(){
 }
 
 void pushNext(){
-  if(pushVar != 4){
+  if(pushVar == 4){
     pushVar = 0;
   } else {
     pushVar = pushVar + 1;
