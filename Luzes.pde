@@ -7,7 +7,10 @@ LiquidCrystal lcd(7, 6, 5, 4, 3, 2);
 int luzNegra = 8, luzBranca = 12;
 
 //Variaveis de ambiente
-int statusNegra = 0, statusBranca = 0, lcdLedStatus = 0, lcdLedTime = 1, resposta, i, ultimoTemp = 0, segundo = 0, leds = 11, pushVar = 0;
+int statusNegra = 0, statusBranca = 0, resposta, i, ultimoTemp = 0, segundo = 0, leds = 11, pushVar = 0;
+
+//Controler do LCD
+int lcdLedStatus = 0, lcdLedTime = 1, lcdStatus = 1;
 
 //Caracteres
 byte termometro[8] = {B00100, B01010, B01010, B01110, B01110, B11111, B11111, B01110};
@@ -27,7 +30,7 @@ float wbranca = 0.66, wnegra = 0.33, tconsumo = 0;
 int consumo = 0;
 
 // Relógio e calendário
-int dia = 23, mes = 7, ano = 11, hora = 6, minuto = 10, segundos = 0, relogioSegundo = 0;
+int dia = 24, mes = 7, ano = 11, hora = 0, minuto = 8, segundos = 0, relogioSegundo = 0;
 
 //Sistema de infravermelho
 int valorIR = 0;
@@ -49,7 +52,7 @@ void setup() {
   lcd.createChar(1, bolinha);
   analogWrite(9, 100);
   lcd.setCursor(0, 0);
-  lcd.print("HG RoomOS 1.0.4");
+  lcd.print("HG Room OS 1.1.0");
   lcd.setCursor(0, 1);
   lcd.print("   Bem-vindo!   ");
   delay(3000);
@@ -94,7 +97,6 @@ void loop() {
  }
   
   exibirTemperatura(segundo, ultimoTemp);
-  statusLuzes();
   push();
   lcdLedTimer();
   relogioLoop();
@@ -141,6 +143,12 @@ void lcdLedTimer(){
     } else {
       if(lcdLedTime <= segundo){
         analogWrite(9, 0);
+        if(statusBranca == 0 && statusNegra == 0) {
+          if(lcdStatus == 1){
+            lcdStatus = 0;
+            lcd.clear();
+          }
+        }
       }
     }
   } else {
@@ -220,14 +228,16 @@ void controleLoop(){
 }
 
 void showRelogio(){
-  lcd.setCursor(5, 1);
-  showInt(dia);
-  lcd.print("/");
-  showInt(mes);
-  lcd.print(" ");
-  showInt(hora);
-  lcd.print(":");
-  showInt(minuto);
+  if(lcdStatus == 1){
+    lcd.setCursor(5, 1);
+    showInt(dia);
+    lcd.print("/");
+    showInt(mes);
+    lcd.print(" ");
+    showInt(hora);
+    lcd.print(":");
+    showInt(minuto);
+  }
 }
 
 void showLightUptime(){
@@ -239,13 +249,31 @@ void showLightUptime(){
 }
 
 void showInt(int valor){
-  if(valor <= 9) lcd.print("0");
-  lcd.print(valor);
+  if(lcdStatus == 1){
+    if(valor <= 9) lcd.print("0");
+    lcd.print(valor);
+  }
 }
 
 void cron(){
+  //Desliga a luz branca as 02:00
   if(hora == 2 && minuto == 0){
     if(statusBranca == 1) statusBranca = apagar(luzBranca);
+  }
+  
+  //Desliga a luz branca apos 4 horas ligada
+  if(statusBranca == 1 && uhora >= 4) statusBranca = apagar(luzBranca);
+  
+  //Ativa o display de LCD
+  if(statusBranca == 1 || statusNegra == 1) {
+    lcdStatus = 1;
+    lcd.setCursor(0, 0);
+    lcd.print("   Carregando   ");
+    lcd.setCursor(0, 1);
+    lcd.write(0);
+    lcd.print("--");
+    lcd.write(1);
+    lcd.print(" 00/00 00:00");
   }
 }
 
@@ -259,57 +287,23 @@ void debug(){
 }
 
 void exibirTemperatura(int seg, int ultimo){
- lcd.setCursor(0, 1);
- lcd.write(0);
- for(i = 0;i<=7;i++){
-  samples[i] = ( 5.0 * analogRead(tempertura) * 100.0) / 1024.0;
-  tempc = tempc + samples[i];
-  delay(10);
- }
+  tempc = 0;
+  lcd.setCursor(0, 1);
+  if(lcdStatus == 1) lcd.write(0);
+  for(i = 0;i<=7;i++){
+    samples[i] = ( 5.0 * analogRead(tempertura) * 100.0) / 1024.0;
+    tempc = tempc + samples[i];
+    delay(10);
+  }
 
- tempc = (tempc/8.0) - 4;
- if(segundo == (ultimo + 5)){
-  lcd.print(tempc);
-  lcd.write(1);
-  lcd.print(" ");
- }
- tempc = 0;
-}
-
-void statusLuzes(){
-  /*lcd.setCursor(0, 0);
-  if(statusBranca == 0 && statusNegra == 0){
-    lcd.print(" Luzes apagadas ");
-    tconsumo = 0;
-  } else {
-    if(segundos >= 30){
-      showLightUptime();
-      lcd.print("   ");
-      showInt(consumo);
-      lcd.print(" Watts   ");
-    } else {
-      if(statusBranca == 1 && statusNegra == 1){
-        lcd.print("  Luzes acesas  ");
-        tconsumo = wbranca + wnegra;
-      } else {
-        if(statusBranca == 1){
-          lcd.print("Luz branca acesa");
-          tconsumo = wbranca;
-        } else {
-          lcd.print("Luz negra acesa");
-          tconsumo = wnegra;
-        }
-      }
+  tempc = (tempc/8.0) - 4;
+  if(segundo == (ultimo + 5)){
+    if(lcdStatus == 1){
+      lcd.print(tempc);
+      lcd.write(1);
+      lcd.print(" ");
     }
-  }*/
-  
-  /*if(statusBranca == 0){
-    analogWrite(9, 5);
-    digitalWrite(leds, HIGH);
-  } else {
-    analogWrite(9, 100);
-    digitalWrite(leds, LOW);
-  }*/
+  }
 }
 
 void zerarControle(){
@@ -351,66 +345,78 @@ int teclado(int tecladoPin){
 void push(){
   lcd.setCursor(0, 0);
   
-  switch(pushVar){
-    /* Mostra o status das luzes */
-    case 0:
-      if(statusBranca == 0 && statusNegra == 0){
-        lcd.print(" Luzes apagadas ");
-        tconsumo = 0;
-      } else {
-        if(statusBranca == 1 && statusNegra == 1){
-          lcd.print("  Luzes acesas  ");
-          tconsumo = wbranca + wnegra;
+  if(lcdStatus == 1){
+    switch(pushVar){
+      /* Mostra o status das luzes */
+      case 0:
+        if(statusBranca == 0 && statusNegra == 0){
+          lcd.print(" Luzes apagadas ");
+          tconsumo = 0;
         } else {
-          if(statusBranca == 1){
-            lcd.print("Luz branca acesa");
-            tconsumo = wbranca;
+          if(statusBranca == 1 && statusNegra == 1){
+            lcd.print("  Luzes acesas  ");
+            tconsumo = wbranca + wnegra;
           } else {
-            lcd.print("Luz negra acesa");
-            tconsumo = wnegra;
+            if(statusBranca == 1){
+              lcd.print("Luz branca acesa");
+              tconsumo = wbranca;
+            } else {
+              lcd.print("Luz negra acesa");
+              tconsumo = wnegra;
+            }
           }
         }
-      }
-      break;
+        break;
       
-    /* Mostra o consumo de energia da luz */
-    case 1:
-      if(statusBranca == 0 && statusNegra == 0){
-        pushNext();
-      } else {
-        showLightUptime();
-        lcd.print("   ");
-        showInt(consumo);
-        lcd.print(" Watts   ");
-      }
-      break;
+      /* Mostra o consumo de energia da luz */
+      case 1:
+        if(statusBranca == 0 && statusNegra == 0){
+          pushNext();
+        } else {
+          showLightUptime();
+          lcd.print("   ");
+          showInt(consumo);
+          lcd.print(" Watts   ");
+        }
+        break;
       
-    /* Mostra os lembretes de contas */
-    case 2:
-      if(dia == 9){
-        lcd.print("Pagar cart. VISA");
-      } else if(dia == 21) {
-        lcd.print("Pagar MasterCard");
-      } else {
-        pushNext();
-      }
-      break;
+      /* Mostra os lembretes de contas */
+      case 2:
+        switch(dia){
+          case 1:
+            lcd.print("Pagar parc. Carro");
+            break;
+          case 9:
+            lcd.print("Pagar cart. VISA");
+            break;
+          case 10:
+            lcd.print("Pagar cart. BB  ");
+            break;
+          case 21:
+            lcd.print("Pagar MasterCard");
+            break;
+          default:
+            lcd.print("Nenhum lembrete.");
+            break;
+        }
+        break;
       
-    /* Mostra o status da temperatuda */
-    case 3:
-      if(tempc <= 18){
-        lcd.print(" Ambiente frio  ");
-      } else if(tempc >= 26){
-        lcd.print("Ambiente quente ");
-      } else {
-        lcd.print("Temp. agradavel ");
-      }
-      break;
+      /* Mostra o status da temperatuda */
+      case 3:
+        if(tempc <= 18){
+          lcd.print(" Ambiente frio  ");
+        } else if(tempc >= 26){
+          lcd.print("Ambiente quente ");
+        } else {
+          lcd.print("Temp. agradavel ");
+        }
+        break;
     
-    /* Mostra a versao do sistema */
-    case 4:
-      lcd.print("HG RoomOS 1.0.4");
-      break;
+      /* Mostra a versao do sistema */
+      case 4:
+        lcd.print("HG Room OS 1.1.0");
+        break;
+    }
   }
 }
 

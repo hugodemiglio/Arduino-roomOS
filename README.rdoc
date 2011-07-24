@@ -1,17 +1,23 @@
 == Hugo Demiglio Arduino RoomOS
 
-Current version 1.0.4
+Current version 1.1.0
 
 > Change log
 
-== 1.0.4 (2011-07-22)
+== 1.1.0 (2011-07-24)
+- Release of the new system for push notifications on the screen
+- Fixes bugs in the system control the intensity of the brightness of the LCD
+- Clean lcd screen after 30 seconds with backlight off
+- Turn off the main light after four hours on
+
+== 1.0.4 (2011-07-22) beta
 - New notification system on the screen
 
 == 1.0.3 (2011-06-05)
 - System that monitors the time and current consumption of the lights
 
 == 1.0.2 (2011-05-12)
-- Trying another method to retrieve the time
+- New method to retrieve the time
 - Problem with button locked solved
 - Improvements in the symbol of temperature.
 
