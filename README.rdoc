@@ -9,6 +9,7 @@ Current version 1.1.0
 - Fixes bugs in the system control the intensity of the brightness of the LCD
 - Clean lcd screen after 30 seconds with backlight off
 - Turn off the main light after four hours on
+- Show reminders when turn on any light
 
 == 1.0.4 (2011-07-22) beta
 - New notification system on the screen

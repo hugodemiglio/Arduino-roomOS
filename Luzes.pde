@@ -30,7 +30,7 @@ float wbranca = 0.66, wnegra = 0.33, tconsumo = 0;
 int consumo = 0;
 
 // Relógio e calendário
-int dia = 24, mes = 7, ano = 11, hora = 0, minuto = 8, segundos = 0, relogioSegundo = 0;
+int dia = 24, mes = 7, ano = 11, hora = 1, minuto = 44, segundos = 0, relogioSegundo = 0;
 
 //Sistema de infravermelho
 int valorIR = 0;
@@ -117,7 +117,8 @@ void loop() {
 int acender(int luz){
   digitalWrite(luz, LOW);
   zerarControle();
-  pushVar = 3;
+  ultimoTemp = segundo;
+  pushVar = 2;
   if(luz == luzBranca){
     analogWrite(9, 100);
     //digitalWrite(leds, LOW);
@@ -266,14 +267,16 @@ void cron(){
   
   //Ativa o display de LCD
   if(statusBranca == 1 || statusNegra == 1) {
-    lcdStatus = 1;
-    lcd.setCursor(0, 0);
-    lcd.print("   Carregando   ");
-    lcd.setCursor(0, 1);
-    lcd.write(0);
-    lcd.print("--");
-    lcd.write(1);
-    lcd.print(" 00/00 00:00");
+    if(lcdStatus == 0){
+      lcdStatus = 1;
+      lcd.setCursor(0, 0);
+      lcd.print("   Carregando   ");
+      lcd.setCursor(0, 1);
+      lcd.write(0);
+      lcd.print("--");
+      lcd.write(1);
+      lcd.print(" 00/00 00:00");
+    }
   }
 }
 
