@@ -1,8 +1,11 @@
 == Hugo Demiglio Arduino RoomOS
 
-Current version 1.1.0
+Current version stable 1.2.0
 
 > Change log
+
+== 1.2.0 (2011-07-27)
+- Menu system to set lights state, date and time
 
 == 1.1.0 (2011-07-24)
 - Release of the new system for push notifications on the screen

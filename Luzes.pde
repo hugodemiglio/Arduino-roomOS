@@ -15,6 +15,12 @@ int lcdLedStatus = 0, lcdLedTime = 1, lcdStatus = 1;
 //Caracteres
 byte termometro[8] = {B00100, B01010, B01010, B01110, B01110, B11111, B11111, B01110};
 byte bolinha[8] = {B01100, B10010, B10010, B01100, B00000, B00000, B00000, B00000};
+byte b1[8] = {B01111, B10000, B10000, B10000, B10000, B10000, B10000, B01111};
+byte b3[8] = {B11111, B11111, B11111, B11111, B11111, B11111, B11111, B11111};
+byte b4[8] = {B11110, B11111, B11111, B11111, B11111, B11111, B11111, B11110};
+byte b5[8] = {B01111, B11111, B11111, B11111, B11111, B11111, B11111, B01111};
+byte b7[8] = {B11111, B00000, B00000, B00000, B00000, B00000, B00000, B11111};
+byte b8[8] = {B11110, B00001, B00001, B00001, B00001, B00001, B00001, B11110};
 
 //Sistema de temperatura
 int tempc = 0, samples[8], tempertura = A0;
@@ -50,6 +56,15 @@ void setup() {
   lcd.begin(16,2);
   lcd.createChar(0, termometro);
   lcd.createChar(1, bolinha);
+  
+  lcd.createChar(2, b1);
+  lcd.createChar(3, b3);
+  lcd.createChar(4, b4);
+  
+  lcd.createChar(5, b5);
+  lcd.createChar(6, b7);
+  lcd.createChar(7, b8);
+  
   analogWrite(9, 100);
   lcd.setCursor(0, 0);
   lcd.print("HG Room OS 1.2.0");
@@ -75,10 +90,12 @@ void loop() {
       }
     }
     if(results.value == 2011287612){
-      statusBranca = acender(luzBranca);
+      if(menu == 0) statusBranca = acender(luzBranca);
+      else menuAction(1);
     }
     if(results.value == 2011279420){
-      statusBranca = apagar(luzBranca);
+      if(menu == 0) statusBranca = apagar(luzBranca);
+      else menuAction(0);
     }
     if(results.value == 2011291708){
       if(menu == 0) statusNegra = acender(luzNegra);
@@ -274,13 +291,7 @@ void cron(){
   if(statusBranca == 1 || statusNegra == 1) {
     if(lcdStatus == 0){
       lcdStatus = 1;
-      lcd.setCursor(0, 0);
-      lcd.print("   Carregando   ");
-      lcd.setCursor(0, 1);
-      lcd.write(0);
-      lcd.print("--");
-      lcd.write(1);
-      lcd.print(" 00/00 00:00");
+      limparTela();
     }
   }
 }
@@ -322,11 +333,13 @@ void zerarControle(){
 }
 
 void limparTela(){
-  for (int i = 0; i <= 15; i++) {
-    lcd.print(" "); 
-    delay(90);
-  }
   lcd.setCursor(0, 0);
+  lcd.print("   Carregando   ");
+  lcd.setCursor(0, 1);
+  lcd.write(0);
+  lcd.print("--");
+  lcd.write(1);
+  lcd.print(" 00/00 00:00");
 }
 
 int teclado(int tecladoPin){
@@ -437,8 +450,9 @@ void pushNext(){
 }
 
 void menuNext(){
-  if(menu == 5){
+  if(menu == 6){
     menu = 0;
+    limparTela();
   } else {
     menu = menu + 1;
   }
@@ -469,6 +483,14 @@ void menuAction(int mode){
       else mes = mes - 1;
       if(mes >= 13) mes = 0;
       if(mes < 0) mes = 12;
+      break;
+    case 5:
+      if(statusBranca == 1) statusBranca = apagar(luzBranca);
+      else statusBranca = acender(luzBranca);
+      break;
+    case 6:
+      if(statusNegra == 1) statusNegra = apagar(luzNegra);
+      else statusNegra = acender(luzNegra);
       break;
   }
 }
@@ -503,6 +525,42 @@ void mainMenu(){
       lcd.print("   -   ");
       showInt(mes);
       lcd.print("   +   ");
+      break;
+    case 5:
+      lcd.print("   Luz branca   ");
+      lcd.setCursor(0, 1);
+      if(statusBranca == 1) {
+        lcd.print("  ligada   ");
+        lcd.write(2);
+        lcd.write(6);
+        lcd.write(3);
+        lcd.write(4);
+      } else {
+        lcd.print(" desligada ");
+        lcd.write(5);
+        lcd.write(3);
+        lcd.write(6);
+        lcd.write(7);
+      }
+      lcd.print(" ");
+      break;
+    case 6:
+      lcd.print("   Luz  negra   ");
+      lcd.setCursor(0, 1);
+      if(statusNegra == 1) {
+        lcd.print("  ligada   ");
+        lcd.write(2);
+        lcd.write(6);
+        lcd.write(3);
+        lcd.write(4);
+      } else {
+        lcd.print(" desligada ");
+        lcd.write(5);
+        lcd.write(3);
+        lcd.write(6);
+        lcd.write(7);
+      }
+      lcd.print(" ");
       break;
   }
 }
