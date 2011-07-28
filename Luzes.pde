@@ -7,7 +7,7 @@ LiquidCrystal lcd(7, 6, 5, 4, 3, 2);
 int luzNegra = 8, luzBranca = 12;
 
 //Variaveis de ambiente
-int statusNegra = 0, statusBranca = 0, resposta, i, ultimoTemp = 0, segundo = 0, leds = 11, pushVar = 0;
+int statusNegra = 0, statusBranca = 0, resposta, i, ultimoTemp = 0, segundo = 0, leds = 11, pushVar = 0, menu = 0;
 
 //Controler do LCD
 int lcdLedStatus = 0, lcdLedTime = 1, lcdStatus = 1;
@@ -52,7 +52,7 @@ void setup() {
   lcd.createChar(1, bolinha);
   analogWrite(9, 100);
   lcd.setCursor(0, 0);
-  lcd.print("HG Room OS 1.1.0");
+  lcd.print("HG Room OS 1.2.0");
   lcd.setCursor(0, 1);
   lcd.print("   Bem-vindo!   ");
   delay(3000);
@@ -81,14 +81,15 @@ void loop() {
       statusBranca = apagar(luzBranca);
     }
     if(results.value == 2011291708){
-      statusNegra = acender(luzNegra);
+      if(menu == 0) statusNegra = acender(luzNegra);
+      else menuAction(1);
     }
     if(results.value == 2011238460){
-      statusNegra = apagar(luzNegra);
+      if(menu == 0) statusNegra = apagar(luzNegra);
+      else menuAction(0);
     }
     if(results.value == 2011250748){
-      statusNegra = apagar(luzNegra);
-      statusBranca = apagar(luzBranca);
+      menuNext();
     }
     lcd.setCursor(10, 0);
     valorIR = (results.value);
@@ -96,15 +97,19 @@ void loop() {
     irrecv.resume();
  }
   
-  exibirTemperatura(segundo, ultimoTemp);
-  push();
+  if(menu == 0){
+    exibirTemperatura(segundo, ultimoTemp);
+    push();
+    showRelogio();
+  } else {
+    mainMenu();
+  }
+  
   lcdLedTimer();
   relogioLoop();
   controleLoop();
-  showRelogio();
-  //debug();
-  
   cron();
+  //debug();
   
   delay(200);
   if(segundo == (ultimoTemp + 5)){
@@ -417,7 +422,7 @@ void push(){
     
       /* Mostra a versao do sistema */
       case 4:
-        lcd.print("HG Room OS 1.1.0");
+        lcd.print("HG Room OS 1.2.0");
         break;
     }
   }
@@ -428,5 +433,76 @@ void pushNext(){
     pushVar = 0;
   } else {
     pushVar = pushVar + 1;
+  }
+}
+
+void menuNext(){
+  if(menu == 5){
+    menu = 0;
+  } else {
+    menu = menu + 1;
+  }
+}
+
+void menuAction(int mode){
+  switch(menu){
+    case 1:
+      if(mode == 1) hora = hora + 1;
+      else hora = hora - 1;
+      if(hora >= 24) hora = 0;
+      if(hora < 0) hora = 23;
+      break;
+    case 2:
+      if(mode == 1) minuto = minuto + 1;
+      else minuto = minuto - 1;
+      if(minuto >= 60) minuto = 0;
+      if(minuto < 0) minuto = 59;
+      break;
+    case 3:
+      if(mode == 1) dia = dia + 1;
+      else dia = dia - 1;
+      if(dia >= 32) dia = 0;
+      if(dia < 0) dia = 31;
+      break;
+    case 4:
+      if(mode == 1) mes = mes + 1;
+      else mes = mes - 1;
+      if(mes >= 13) mes = 0;
+      if(mes < 0) mes = 12;
+      break;
+  }
+}
+
+void mainMenu(){
+  lcd.setCursor(0, 0);
+  switch(menu){
+    case 1:
+      lcd.print(" Ajuste da hora ");
+      lcd.setCursor(0, 1);
+      lcd.print("   -   ");
+      showInt(hora);
+      lcd.print("   +   ");
+      break;
+    case 2:
+      lcd.print(" Ajuste minuto ");
+      lcd.setCursor(0, 1);
+      lcd.print("   -   ");
+      showInt(minuto);
+      lcd.print("   +   ");
+      break;
+    case 3:
+      lcd.print(" Ajuste do dia ");
+      lcd.setCursor(0, 1);
+      lcd.print("   -   ");
+      showInt(dia);
+      lcd.print("   +   ");
+      break;
+    case 4:
+      lcd.print(" Ajuste do mes ");
+      lcd.setCursor(0, 1);
+      lcd.print("   -   ");
+      showInt(mes);
+      lcd.print("   +   ");
+      break;
   }
 }

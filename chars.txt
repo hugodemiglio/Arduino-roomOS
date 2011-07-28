@@ -1,0 +1,28 @@
+ XXXX XXXXX XXXXX XXXX 
+X                     X
+X                     X
+X                     X
+X                     X
+X                     X
+X                     X
+ XXXX XXXXX XXXXX XXXX 
+
+ XXXX XXXXX XXXXX XXXX 
+X            XXXX XXXXX
+X   X X     XXXXX XXXXX
+X   X X     XXXXX XXXXX
+X   X X     XXXXX XXXXX
+X   X X     XXXXX XXXXX
+X            XXXX XXXXX
+ XXXX XXXXX XXXXX XXXX 
+ 
+ XXXX XXXXX XXXXX XXXX 
+XXXXX XXXX            X
+XXXXX XXXXX           X
+XXXXX XXXXX           X
+XXXXX XXXXX           X
+XXXXX XXXXX           X
+XXXXX XXXX            X
+ XXXX XXXXX XXXXX XXXX
+ 
+byte b1[8] = {B01111, B10000, B10001, B10001, B10001, B10001, B10000, B01111};
