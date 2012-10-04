@@ -7,7 +7,7 @@ LiquidCrystal lcd(7, 6, 5, 4, 3, 2);
 int luzNegra = 8, luzBranca = 12;
 
 //Variaveis de ambiente
-int statusNegra = 0, statusBranca = 0, resposta, i, ultimoTemp = 0, segundo = 0, leds = 11, pushVar = 0, menu = 0;
+int statusNegra = 0, statusBranca = 0, resposta, i, ultimoTemp = 0, segundo = 0, leds = 11, pushVar = 0, menu = 0, quedaEnergia = 1;
 
 //Controler do LCD
 int lcdLedStatus = 0, lcdLedTime = 1, lcdStatus = 1;
@@ -36,7 +36,7 @@ float wbranca = 0.66, wnegra = 0.33, tconsumo = 0;
 int consumo = 0;
 
 // Relógio e calendário
-int dia = 24, mes = 7, ano = 11, hora = 1, minuto = 44, segundos = 0, relogioSegundo = 0;
+int dia = 1, mes = 1, ano = 12, hora = 0, minuto = 0, segundos = 0, relogioSegundo = 0;
 
 //Sistema de infravermelho
 int valorIR = 0;
@@ -44,7 +44,9 @@ IRrecv irrecv(10);
 decode_results results;
 
 void setup() {
-  //digitalWrite(leds, HIGH);
+  //pinMode(leds, OUTPUT);
+  //analogWrite(leds, 5);
+  digitalWrite(leds, HIGH);
   //analogWrite(leds, 20);
   irrecv.enableIRIn();
   //Serial.begin(9600);
@@ -67,7 +69,7 @@ void setup() {
   
   analogWrite(9, 100);
   lcd.setCursor(0, 0);
-  lcd.print("HG Room OS 1.2.0");
+  lcd.print("HG Room OS 1.2.1");
   lcd.setCursor(0, 1);
   lcd.print("   Bem-vindo!   ");
   delay(3000);
@@ -82,6 +84,7 @@ void loop() {
   acoes();
   
   if (irrecv.decode(&results)) {
+    //Serial.println(results.value);
     if(results.value == 3782895767){
       if(statusBranca == 0){
         statusBranca = acender(luzBranca);
@@ -89,24 +92,25 @@ void loop() {
         statusBranca = apagar(luzBranca);
       }
     }
-    if(results.value == 2011287612){
+    if(results.value == 2011254978){
       if(menu == 0) statusBranca = acender(luzBranca);
       else menuAction(1);
     }
-    if(results.value == 2011279420){
+    if(results.value == 2011246786){
       if(menu == 0) statusBranca = apagar(luzBranca);
       else menuAction(0);
     }
-    if(results.value == 2011291708){
+    if(results.value == 2011259074){
       if(menu == 0) statusNegra = acender(luzNegra);
       else menuAction(1);
     }
-    if(results.value == 2011238460){
+    if(results.value == 2011271362){
       if(menu == 0) statusNegra = apagar(luzNegra);
       else menuAction(0);
     }
-    if(results.value == 2011250748){
+    if(results.value == 2011283650){
       menuNext();
+      if(quedaEnergia == 1) quedaEnergia = 0;
     }
     lcd.setCursor(10, 0);
     valorIR = (results.value);
@@ -413,6 +417,9 @@ void push(){
           case 10:
             lcd.print("Pagar cart. BB  ");
             break;
+          case 15:
+            lcd.print("Pagar Submarino ");
+            break;
           case 21:
             lcd.print("Pagar MasterCard");
             break;
@@ -421,9 +428,17 @@ void push(){
             break;
         }
         break;
+        
+      case 3:
+        if(quedaEnergia == 1) {
+          lcd.print("Queda de Energia");
+        } else {
+          pushNext();
+        }
+        break;
       
       /* Mostra o status da temperatuda */
-      case 3:
+      case 4:
         if(tempc <= 18){
           lcd.print(" Ambiente frio  ");
         } else if(tempc >= 26){
@@ -434,15 +449,15 @@ void push(){
         break;
     
       /* Mostra a versao do sistema */
-      case 4:
-        lcd.print("HG Room OS 1.2.0");
+      case 5:
+        lcd.print("HG Room OS 1.2.1");
         break;
     }
   }
 }
 
 void pushNext(){
-  if(pushVar == 4){
+  if(pushVar == 5){
     pushVar = 0;
   } else {
     pushVar = pushVar + 1;

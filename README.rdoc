@@ -4,6 +4,12 @@ Current version stable 1.2.0
 
 > Change log
 
+== 1.2.1 (2012-10-04)
+- Change ir remote controller codes
+- Add libraries folder to git (IR lib included)
+- Commented serial output to ir controller codes
+- Some changes on buttons night lights
+
 == 1.2.0 (2011-07-27)
 - Menu system to set lights state, date and time
 
