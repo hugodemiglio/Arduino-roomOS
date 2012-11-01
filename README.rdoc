@@ -1,6 +1,6 @@
 == Hugo Demiglio Arduino RoomOS
 
-Current version stable 1.2.0
+Current version stable 1.2.1
 
 > Change log
 
