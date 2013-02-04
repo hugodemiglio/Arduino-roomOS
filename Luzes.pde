@@ -9,6 +9,9 @@ int luzNegra = 8, luzBranca = 12;
 //Variaveis de ambiente
 int statusNegra = 0, statusBranca = 0, resposta, i, ultimoTemp = 0, segundo = 0, leds = 11, pushVar = 0, menu = 0, quedaEnergia = 1;
 
+//Variaveis Seriais
+int serial_read, bt_update = 0;
+
 //Controler do LCD
 int lcdLedStatus = 0, lcdLedTime = 1, lcdStatus = 1;
 
@@ -36,7 +39,7 @@ float wbranca = 0.66, wnegra = 0.33, tconsumo = 0;
 int consumo = 0;
 
 // Relógio e calendário
-int dia = 1, mes = 1, ano = 12, hora = 0, minuto = 0, segundos = 0, relogioSegundo = 0;
+int dia = 1, mes = 1, ano = 13, hora = 0, minuto = 0, segundos = 0, relogioSegundo = 0;
 
 //Sistema de infravermelho
 int valorIR = 0;
@@ -49,7 +52,7 @@ void setup() {
   digitalWrite(leds, HIGH);
   //analogWrite(leds, 20);
   irrecv.enableIRIn();
-  //Serial.begin(9600);
+  Serial.begin(9600);
   
   //Pinos
   pinMode(luzBranca, OUTPUT);
@@ -69,7 +72,7 @@ void setup() {
   
   analogWrite(9, 100);
   lcd.setCursor(0, 0);
-  lcd.print("HG Room OS 1.2.1");
+  lcd.print("HG Room OS 1.3.0");
   lcd.setCursor(0, 1);
   lcd.print("   Bem-vindo!   ");
   delay(3000);
@@ -82,6 +85,40 @@ void loop() {
   
   tecla = teclado(tecladoPin);
   acoes();
+  
+  if(Serial.available() > 0) {
+    serial_read = Serial.read();
+    switch (serial_read){
+      case 'I':
+        Serial.print(statusBranca);
+        Serial.print("|");
+        Serial.print(statusNegra);
+        Serial.print("|");
+        Serial.println(tempc);
+      break;
+      case 'N':
+        if(statusNegra == 0){
+          statusNegra = acender(luzNegra);
+        } else {
+          statusNegra = apagar(luzNegra);
+        }
+      break;
+      case 'B':
+        if(statusBranca == 0){
+          statusBranca = acender(luzBranca);
+        } else {
+          statusBranca = apagar(luzBranca);
+        }
+      break;
+      case 'T':
+        bt_update = 1;
+      break;
+      default:
+        serial_update(serial_read);
+        Serial.println(serial_read);
+      break;
+    }
+  }
   
   if (irrecv.decode(&results)) {
     //Serial.println(results.value);
@@ -450,7 +487,7 @@ void push(){
     
       /* Mostra a versao do sistema */
       case 5:
-        lcd.print("HG Room OS 1.2.1");
+        lcd.print("HG Room OS 1.3.0");
         break;
     }
   }
@@ -577,5 +614,33 @@ void mainMenu(){
       }
       lcd.print(" ");
       break;
+  }
+}
+
+void serial_update(int serial_data){
+  switch (bt_update){
+    case 1:
+      dia = serial_data;
+      bt_update++;
+    break;
+    case 2:
+      mes = serial_data;
+      bt_update++;
+    break;
+    case 3:
+      hora = serial_data;
+      bt_update++;
+    break;
+    case 4:
+      minuto = serial_data;
+      bt_update++;
+    break;
+    case 5:
+      segundos = serial_data;
+      bt_update = 0;
+    break;
+    default:
+      bt_update = 0;
+    break;
   }
 }

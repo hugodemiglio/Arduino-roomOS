@@ -1,8 +1,13 @@
 == Hugo Demiglio Arduino RoomOS
 
-Current version stable 1.2.1
+Current version stable 1.3.0
 
 > Change log
+
+== 1.3.0 (2013-02-04)
+- Bluetooth (Serial) communication for system control
+- Now the Serial Port can update clock and do some actions
+- Ruby script to Serial communication
 
 == 1.2.1 (2012-10-04)
 - Change ir remote controller codes
