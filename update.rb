@@ -4,13 +4,16 @@
 # Ruby controller 1.0.0
 require 'serialport'
 require 'terminfo'
+require 'time'
 
 class ArduinoRoomOS
   @@version = '1.0.0 beta'
   
   @@port_str = "/dev/tty.arduino"
   @@light = [1 => true, 2 => true]
-  @@success = true
+  @@power_outage = false
+  @@arduino_time = Time.now
+  @@success = false
   @@startup = true
   @@temperatura = 0
   
@@ -81,6 +84,13 @@ class ArduinoRoomOS
           when "4"
             self.show_info
             reprint_menu = true
+          when "5"
+            up_lines += 2
+            self.update_time
+            print " Entre com uma nova escolha: "
+          when "6"
+            self.serial_streaming
+            reprint_menu = true
           when "Q"
             inside_menu = false
             reprint_menu = true
@@ -132,7 +142,6 @@ class ArduinoRoomOS
   
   def start_connection
     self.show_progress 1, 3, "Iniciando conexao..."
-    sleep 1
     status_negra = false
     status_branca = true
     
@@ -141,19 +150,19 @@ class ArduinoRoomOS
     stop_bits = 1
     parity = SerialPort::NONE
     
-    # try = 3
-    # while(try > 0)
-    #   begin
-    #     @@sp = SerialPort.new(@@port_str, baud_rate, data_bits, stop_bits, parity)
-    #     @@success = true
-    #     try = 0
-    #   rescue
-    #     self.clear_line
-    #     puts " Iniciando conexão #{4 - try}/3... \033[91m[ FAIL ]\033[0m"
-    #     try = try - 1
-    #     self.show_progress 1, 3, "Tentando novamente..."
-    #   end
-    # end
+    try = 3
+    while(try > 0)
+      begin
+        @@sp = SerialPort.new(@@port_str, baud_rate, data_bits, stop_bits, parity)
+        @@success = true
+        try = 0
+      rescue
+        self.clear_line
+        puts " Iniciando conexão #{4 - try}/3... \033[91m[ FAIL ]\033[0m"
+        try = try - 1
+        self.show_progress 1, 3, "Tentando novamente..."
+      end
+    end
     
     if @@success
       self.clear_line
@@ -175,6 +184,7 @@ class ArduinoRoomOS
         self.show_progress 2, 3, "Obtendo informações..."
                 
         @@sp.write("I")
+        sleep 1
         i = @@sp.gets.chomp
         
         info = i.split("|")
@@ -182,6 +192,8 @@ class ArduinoRoomOS
         @@light[1] = info[0] == '0' ? false : true
         @@light[2] = info[1] == '0' ? false : true
         @@temperatura = info[2].to_i
+        @@power_outage = info[3] == '0' ? false : true
+        @@arduino_time = Time.parse(info[4])
         
         self.clear_line " Obtendo informações..." if @@startup
         puts " \033[92m[ OK ]\033[0m"
@@ -198,22 +210,37 @@ class ArduinoRoomOS
   def show_info
     puts "\n ╔════════════════════════╗"
     puts " ║ Estado atual do Quarto ║"
-    puts " ╠════════════════════════╩═══╗"
-    puts " ║ Luz Branca: #{@@light[1] ? 'acesa  ' : 'apagada'}        ║"
-    puts " ║ Luz Negra: #{@@light[2] ? 'acesa  ' : 'apagada'}         ║"
-    puts " ║ Temeratura do ambiente: #{@@temperatura < 10 ? '0'+@@temperatura.to_s : @@temperatura} ║"
-    puts " ╚════════════════════════════╝\n"
+    puts " ╠════════════════════════╩═══════════════════════════════════╗"
+    self.show_info_line "Luz Branca: #{@@light[1] ? 'acesa' : 'apagada'}"
+    self.show_info_line "Luz Negra: #{@@light[2] ? 'acesa' : 'apagada'}"
+    self.show_info_line "Temeratura do ambiente: #{@@temperatura < 10 ? '0'+@@temperatura.to_s : @@temperatura}"
+    if @@power_outage
+      time_out = self.secunds_to_string(@@arduino_time - Time.parse('2013-1-1 0:0:0'))
+      puts " ╠════════════════════════════════════════════════════════════╣"
+      self.show_info_line "Queda de energia detectada"
+      self.show_info_line "Tempo desde a queda de energia: #{time_out}"
+    else
+      self.show_info_line "Última data obtida: #{@@arduino_time.strftime('%d/%m/%Y %H:%M')}"
+    end
+    puts " ╚════════════════════════════════════════════════════════════╝\n"
+  end
+  
+  def show_info_line message, size = 63
+    print " ║ #{message}"
+    (size - (message.length + 4)).times do
+      print " "
+    end
+    puts "║"
   end
   
   def update_time
     self.show_progress 3, 3, "Atualizando data e hora..."
-    sleep 1
-    # @@sp.write("T")
-    # @@sp.write(Time.now.day.chr)
-    # @@sp.write(Time.now.month.chr)
-    # @@sp.write(Time.now.hour.chr)
-    # @@sp.write(Time.now.min.chr)
-    # @@sp.write(Time.now.sec.chr)
+    @@sp.write("T")
+    @@sp.write(Time.now.day.chr)
+    @@sp.write(Time.now.month.chr)
+    @@sp.write(Time.now.hour.chr)
+    @@sp.write(Time.now.min.chr)
+    @@sp.write(Time.now.sec.chr)
     self.clear_line
     puts " Atualizando data e hora... \033[92m[ OK ]\033[0m"
     @@startup = false
@@ -240,14 +267,48 @@ class ArduinoRoomOS
   end
   
   def serial_streaming
+    system("clear")
     puts "\n Serial Streaming: "
     puts " Para sair, precione Control + C"
     puts ""
-    while true do
-      while (i = sp.gets.chomp) do
-        puts i
+    in_loop = true
+    while in_loop do
+      begin
+        while (i = @@sp.gets.chomp) do
+          puts i
+        end
+        sleep 0.1
+      rescue
+        in_loop = false
       end
     end
+  end
+  
+  def secunds_to_string secs
+    units = {
+      "semana" => 7*24*3600,
+      "dia" => 24*3600,
+      "hora" => 3600,
+      "minuto" => 60,
+      "segundo" => 1,
+    }
+    
+    return "0 segundos" if secs == 0
+    
+    s = ""
+
+    i = 0
+    units.each do |name,divisor|
+      if(quot = (secs / divisor).to_i) != 0
+        next if i > 1
+        s += "#{quot} #{name}"
+        s += (quot.abs > 1 ? "s" : "") + " e "
+        secs -= quot * divisor
+        i += 1
+      end
+    end
+    
+    return s[0..-4]
   end
   
 end

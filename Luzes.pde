@@ -76,6 +76,7 @@ void setup() {
   lcd.setCursor(0, 1);
   lcd.print("   Bem-vindo!   ");
   delay(3000);
+  lcd.clear();
   statusNegra = apagar(luzNegra);
   statusBranca = apagar(luzBranca);
 }
@@ -94,7 +95,21 @@ void loop() {
         Serial.print("|");
         Serial.print(statusNegra);
         Serial.print("|");
-        Serial.println(tempc);
+        Serial.print(tempc);
+        Serial.print("|");
+        Serial.print(quedaEnergia);
+        Serial.print("|20");
+        Serial.print(ano);
+        Serial.print("-");
+        Serial.print(mes);
+        Serial.print("-");
+        Serial.print(dia);
+        Serial.print(" ");
+        Serial.print(hora);
+        Serial.print(":");
+        Serial.print(minuto);
+        Serial.print(":");
+        Serial.println(segundos);
       break;
       case 'N':
         if(statusNegra == 0){
@@ -112,6 +127,7 @@ void loop() {
       break;
       case 'T':
         bt_update = 1;
+        quedaEnergia = 0;
       break;
       default:
         serial_update(serial_read);
