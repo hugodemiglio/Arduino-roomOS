@@ -41,12 +41,17 @@ class ArduinoRoomOS
     
       self.menu
     
-      # @@sp.close
       system('clear')
     end
     
     puts "\n HGRoomOS - Serial Controller #{@@version}"
     puts " http://hgbrasil.com - Hugo Demiglio - 2013"
+    
+    if @@success
+      print " Finalizando programa...\r"
+      @@sp.close
+    end
+    
     puts " Programa finalizado com sucesso.\n\n"
   end
   
@@ -213,12 +218,14 @@ class ArduinoRoomOS
     puts " ╠════════════════════════╩═══════════════════════════════════╗"
     self.show_info_line "Luz Branca: #{@@light[1] ? 'acesa' : 'apagada'}"
     self.show_info_line "Luz Negra: #{@@light[2] ? 'acesa' : 'apagada'}"
-    self.show_info_line "Temeratura do ambiente: #{@@temperatura < 10 ? '0'+@@temperatura.to_s : @@temperatura}"
+    self.show_info_line "Temeratura do ambiente: #{@@temperatura < 10 ? '0'+@@temperatura.to_s : @@temperatura}º C"
     if @@power_outage
-      time_out = self.secunds_to_string(@@arduino_time - Time.parse('2013-1-1 0:0:0'))
+      seconds_out = @@arduino_time - Time.parse('2013-1-1 0:0:0')
+      time_out = self.secunds_to_string(seconds_out)
       puts " ╠════════════════════════════════════════════════════════════╣"
       self.show_info_line "Queda de energia detectada"
       self.show_info_line "Tempo desde a queda de energia: #{time_out}"
+      self.show_info_line "Energia restabelecida às: #{(Time.now - seconds_out).strftime('%d/%m/%Y %H:%M')}"
     else
       self.show_info_line "Última data obtida: #{@@arduino_time.strftime('%d/%m/%Y %H:%M')}"
     end

@@ -70,15 +70,30 @@ void setup() {
   lcd.createChar(6, b7);
   lcd.createChar(7, b8);
   
-  analogWrite(9, 100);
   lcd.setCursor(0, 0);
-  lcd.print("HG Room OS 1.3.0");
+  lcd.print("HG Room OS 1.3.1");
   lcd.setCursor(0, 1);
   lcd.print("   Bem-vindo!   ");
+  
+  for(i = 0; i<=100; i++){
+    analogWrite(9, i);
+    delay(5);
+  }
+  
+  // delay(2000);
+  // 
+  // for(i = 0;i<= 20;i++){
+  //   analogWrite(9, 5);
+  //   delay(500);
+  //   analogWrite(9, 200);
+  //   delay(500);
+  // }
+  
   delay(3000);
   lcd.clear();
   statusNegra = apagar(luzNegra);
   statusBranca = apagar(luzBranca);
+  limparTela();
 }
 
 void loop() {
@@ -131,7 +146,7 @@ void loop() {
       break;
       default:
         serial_update(serial_read);
-        Serial.println(serial_read);
+        // Serial.println(serial_read);
       break;
     }
   }
@@ -338,7 +353,7 @@ void showInt(int valor){
 void cron(){
   //Desliga a luz branca as 02:00
   if(hora == 2 && minuto == 0){
-    if(statusBranca == 1) statusBranca = apagar(luzBranca);
+    if(statusBranca == 1 && segundos < 3) statusBranca = apagar(luzBranca);
   }
   
   //Desliga a luz branca apos 4 horas ligada
@@ -375,9 +390,14 @@ void exibirTemperatura(int seg, int ultimo){
   tempc = (tempc/8.0) - 4;
   if(segundo == (ultimo + 5)){
     if(lcdStatus == 1){
-      lcd.print(tempc);
-      lcd.write(1);
-      lcd.print(" ");
+      if(tempc < 99){
+        lcd.print(tempc);
+        lcd.write(1);
+        lcd.print(" ");
+      } else {
+        lcd.print("--");
+        lcd.write(1);
+      }
     }
   }
 }
@@ -461,9 +481,6 @@ void push(){
       /* Mostra os lembretes de contas */
       case 2:
         switch(dia){
-          case 1:
-            lcd.print("Pagar parc. Carro");
-            break;
           case 9:
             lcd.print("Pagar cart. VISA");
             break;
@@ -503,7 +520,7 @@ void push(){
     
       /* Mostra a versao do sistema */
       case 5:
-        lcd.print("HG Room OS 1.3.0");
+        lcd.print("HG Room OS 1.3.1");
         break;
     }
   }
