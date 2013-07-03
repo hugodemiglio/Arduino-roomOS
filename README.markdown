@@ -9,7 +9,7 @@ Current stable version: 1.3.1
 
 See this project at work: http://www.youtube.com/watch?v=aT9Iknwudso
 
-### Recommended depencencies:
+### Recommended dependencies:
 - Arduino IDE 0023
 - Ruby 2.0.0p19 (2013-05-14 revision 40734)
 
