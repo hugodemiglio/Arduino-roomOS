@@ -2,8 +2,11 @@ Arduino RoomOS
 --------------
 
 Author: Hugo Demiglio
+
 Contact: hugodemiglio (at) gmail (dot) com
+
 Current stable version: 1.3.1
+
 See this project at work: http://www.youtube.com/watch?v=aT9Iknwudso
 
 ### Recommended depencencies:
@@ -74,7 +77,7 @@ Tested on Mac OS X 10.8.4 "Mountain Lion"
 - Analog button for commanding the lights
 - Infrared sensor responding to commands from apple remote
 
-LICENÇA:
+LICENCE:
 --------
 
 (The MIT License)
